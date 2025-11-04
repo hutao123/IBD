@@ -18,21 +18,21 @@ case_1990<-subset(WCBA,
 )
 
 case_1990$val<-case_1990$val/1000000
-###----2021------
-case_2021<-subset(WCBA,WCBA$year==2021 &
+###----2023------
+case_2023<-subset(WCBA,WCBA$year==2023 &
                     WCBA$age=='All ages' &
                     WCBA$metric=='Number' &
                     WCBA$measure=='Deaths'
                   
 )
-case_2021$val<-case_2021$val/1000000
+case_2023$val<-case_2023$val/1000000
 
 case_1990 <- case_1990[,c(2,8)]
-case_2021 <- case_2021[,c(2,8)]
+case_2023 <- case_2023[,c(2,8)]
 names(case_1990) <- c('location','case_1990')
-names(case_2021) <- c('location','case_2021')
-country_asr <- merge(case_1990, case_2021, by='location')
-country_asr$val <- (country_asr$case_2021-country_asr$case_1990)/country_asr$case_1990  ### 获取我们的结果
+names(case_2023) <- c('location','case_2023')
+country_asr <- merge(case_1990, case_2023, by='location')
+country_asr$val <- (country_asr$case_2023-country_asr$case_1990)/country_asr$case_1990  ### 获取我们的结果
 
 #########################################################################################
 ####  map 
