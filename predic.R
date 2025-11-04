@@ -37,9 +37,9 @@ BC_Incidence_Female<-subset(BC,
 
 ##转化数据  长转宽
 library(reshape)
-BC_Incidence_Female_n <- reshape2::dcast(data = BC_Incidence_Female,year~age,value.var="val")#年龄为行 年份为列
+BC_Incidence_Female_n <- reshape2::dcast(data = BC_Incidence_Female,year~age,value.var="val")
 #View(BC_Incidence_Female_n)
-BC_Incidence_Female_n<-BC_Incidence_Female_n[,-c(1,22)]#去除第1列year   All ages
+BC_Incidence_Female_n<-BC_Incidence_Female_n[,-c(1,22)]
 BC_Incidence_Female_n <- BC_Incidence_Female_n[,c(1,10,2:9,11:20)]#32行
 
 BC_Incidence_Female_n<-BC_Incidence_Female_n%>%
@@ -47,7 +47,7 @@ BC_Incidence_Female_n<-BC_Incidence_Female_n%>%
                        apply(c(1,2),round)%>%
                        as.data.frame()
 #View(BC_Incidence_Female_n)
-#BC_Incidence_Female_n <- BC_Incidence_Female_n[,]#取15-94岁
+#BC_Incidence_Female_n <- BC_Incidence_Female_n[,]
 #----3.读取人口学数据-----
 library(purrr)
 setwd("E:\\projects\\Rprograms\\Lab\\IBD\\data\\ibd\\GBD_population")
@@ -59,7 +59,6 @@ Population <- Population[,c(4,6,8,10,11,12)]
 
 #Population_China <- Population[which(Population$location=="China"),]
 #unique(Population_China$year)
-#统一化赋值
 colnames(Population)<-c("location","sex","age","metrix","year","val")
 Population$sex[Population$sex=="male"]<-"Male"
 Population$sex[Population$sex=="female"]<-"Female"
@@ -69,7 +68,7 @@ Population$sex[Population$sex=="both"]<-"Both"
 Population <- Population%>%mutate(age=sub(" to ",replacement = "-",age))
 Population <- Population%>%mutate(age=sub(" years",replacement = "",age))
 Population <- Population%>%mutate(age=sub("<5",replacement = "0-4",age))
-unique(Population$age) #没有“1-4” 预测人口中有1-4
+unique(Population$age) 
 
 
 Population <- subset(Population,
@@ -84,7 +83,7 @@ Population <- subset(Population,
 setwd("E:\\projects\\Rprograms\\Lab\\IBD\\预测\\BAPC")
 GBD_population_prediction <- read.csv("IHME_POP_2017_2100_POP_REFERENCE_Y2020M05D01.csv")
 GBD_population_prediction <- subset(GBD_population_prediction,
-                                    GBD_population_prediction$year_id %in% 2022:2040)#提取10年人口预测值
+                                    GBD_population_prediction$year_id %in% 2022:2040)
 
 #unique(GBD_population_prediction$sex)
 #名称也是United States of America
@@ -107,39 +106,38 @@ GBD_population_prediction_1year <- GBD_population_prediction %>% filter(age %in%
 
 GBD_population_prediction <- subset(GBD_population_prediction,
                                     !(age %in% c("Early Neonatal","Late Neonatal" ,"Post Neonatal")))
-#unique(GBD_population_prediction$age)#接下来需要把"1-4" "<1 year" 合并成0-4
+#unique(GBD_population_prediction$age)
 
 #合并
 GBD_population_prediction <- rbind(GBD_population_prediction,GBD_population_prediction_1year)
 
-###处理并合并预测人口"1-4" "<1 year" 合并成0-4
+
 GBD_population_prediction_age4<- GBD_population_prediction %>% filter(age %in% c("<1 year","1-4"))%>% 
   group_by(location,sex,year,metrix)%>%
   summarise(val=sum(val)) %>% 
   mutate(age="0-4")
-#unique(GBD_population_prediction_age4$age)#只有0-4
+#unique(GBD_population_prediction_age4$age)
 
 GBD_population_prediction <- subset(GBD_population_prediction,
                                     !(age %in% c("<1 year","1-4")))
-#View(GBD_population_prediction)#除了0-4之外的所有年龄组
+#View(GBD_population_prediction)
 
 GBD_population_prediction <- rbind(GBD_population_prediction,GBD_population_prediction_age4)
 GBD_population_prediction <- subset(GBD_population_prediction,
                                     age!="All Ages")
 
-#由于列名未一一对应  所以调整其中一个的顺序
 GBD_population_prediction <- GBD_population_prediction[,c(1,2,3,5,4,6)]
 
-#合并现人口数+预测人口数
-GBD <- rbind(Population,GBD_population_prediction)#population和prediction中此时都含有0-4  所以可以合并
 
-#获取GBD里年龄组数据，并重新排序 
+GBD <- rbind(Population,GBD_population_prediction)
+
+
 GBD <- GBD %>% filter(age %in% ages_group) %>% 
                 mutate(age=factor(age,levels = ages_group,ordered = T)) %>% 
                 arrange(age)
 
 
-#提取对应国家的人口学数据
+
 GBD_Global_Female <- GBD %>% filter(location=="China"&sex=="Male")%>% filter(age %in% ages_group)
 #View(GBD_Global_Female)
 #长转宽
@@ -148,13 +146,11 @@ GBD_Global_Female_n <- reshape2::dcast(data=GBD_Global_Female,year~age,value.var
 GBD_Global_Female_n <- GBD_Global_Female_n[,-1]
 
 
-#View(GBD_Global_Female_n)#95+有小数
+#View(GBD_Global_Female_n)
 
 #----正式分析----
 #BAPC模型要求疾病行列和人口数据保持一致
-#BAPC使用时注意：人口数据和发病数据是整数；发病率表和人口统计表横向是年龄 纵向是年份；发病率表中19年以后的数据也要有，数据是NA
 BC_predicted <- matrix(data = NA,nrow=(2040-2021),ncol=ncol(GBD_Global_Female_n)) %>% as.data.frame()
-# GBD_Global_Female_n预测的是1990-2030 有41行  而BC_Incidence_Female_n疾病数据是1990-2021 只有32行 所以要补齐9行
 rownames(BC_predicted)<-seq(2022,2040,1)
 colnames(BC_predicted)<-ages_group
 #View(BC_predicted)
