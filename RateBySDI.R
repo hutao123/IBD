@@ -49,38 +49,6 @@ range(df$val)#31.01337 741.58966
 df$location <- factor(df$location,
                         levels = c("Global", "America","China","India"))
 
-#隐藏图例
-tiff(file = "deaths_female.tiff", width =4, height =3.3, units = "in", res = 300,compression = "lzw")
-ggplot(data = df, aes(x = year, y = val, group = location, color = location)) +
-  geom_line(linewidth = 0.8) +
-  geom_point(size = 1.5) +
-  labs(x = "", y = " ") +
-  scale_x_continuous(
-    limits = c(1990, 2021),
-    breaks = seq(1990, 2020, 10),
-    expand = c(0.02, 0)
-  ) +
-  scale_y_continuous(
-    limits = c(0, 1.3),
-    breaks = seq(0, 1.3, 0.25),  # 修复了不合理的间隔设置（原 seq(0, 1.3, 5) 会无法生成有效刻度）
-    expand = c(0, 0)
-  ) +
-  scale_color_brewer(palette = "Set1") +
-  theme_minimal(base_size = 12) +
-  theme(
-    axis.text.x = element_text(size = 12),
-    # 调整Y轴主刻度文本大小
-    axis.text.y = element_text(size = 12),
-    panel.border = element_rect(fill = NA, color = "black", linewidth = 0.6),
-    panel.grid.major = element_line(color = "grey90", linewidth = 0.2),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black", linewidth = 0.4),
-    axis.title.y = element_text(margin = margin(r = 10)),
-    legend.position = "none",        # 关键设置：彻底隐藏图例
-    plot.margin = margin(10, 10, 10, 10)
-  )
-dev.off()
-
 
 #有图例 上方
 tiff(file = "d_both.tiff", width =4, height =4, units = "in", res = 300,compression = "lzw")
@@ -125,37 +93,3 @@ ggplot(data = df, aes(x = year, y = val, group = location, color = location)) +
 
 dev.off()
 
-
-#去除Y轴标签和隐藏图例
-tiff(file = "d_female.tiff", width =4, height =4, units = "in", res = 300,compression = "lzw")
-
-ggplot(data = df, aes(x = year, y = val, group = location, color = location)) +
-  geom_line(linewidth = 0.8) +
-  geom_point(size = 1.5) +
-  labs(x = "", y = "") +  # 将 y 轴标签设为空字符串
-  scale_x_continuous(
-    limits = c(1990, 2021),
-    breaks = seq(1990, 2020, 10),
-    expand = c(0.02, 0)
-  ) +
-  scale_y_continuous(
-    limits = c(0, 1.3),
-    breaks = seq(0, 1.3, 0.25),
-    expand = c(0, 0)
-  ) +
-  scale_color_brewer(
-    palette = "Set1",
-    name = ""
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.border = element_rect(fill = NA, color = "black", linewidth = 0.6),
-    panel.grid.major = element_line(color = "grey90", linewidth = 0.2),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black", linewidth = 0.4),
-    axis.title.y = element_blank(),  # 彻底移除 y 轴标题的空间
-    legend.position = "none",        # 隐藏图例
-    plot.margin = margin(10, 10, 10, 10)
-  )
-
-dev.off()
