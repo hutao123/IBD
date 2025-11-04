@@ -13,7 +13,7 @@ THA$measure <- str_replace(THA$measure,"DALYs (Disability-Adjusted Life Years)",
 #          location =="India",
 #          measure ==  "DALYs"  ) %>%
 #   mutate(se=(upper-lower)/(2*1.96))%>%
-#   arrange(sex, year) #重要：排序
+#   arrange(sex, year) 
 
 
 THA <- THA %>%
